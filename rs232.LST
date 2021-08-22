@@ -1,0 +1,451 @@
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     1
+
+
+MACRO ASSEMBLER A51 V7.09
+OBJECT MODULE PLACED IN rs232.OBJ
+ASSEMBLER INVOKED BY: G:\Program Files\keil\C51\BIN\A51.EXE rs232.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1      ;¶¨ÒåÎ»±äÁ¿ 1602µÄ¿ØÖÆ¿Ú
+  0092                 2     RS              BIT             P1.2    
+  0091                 3     RW              BIT             P1.1
+  0090                 4     E               BIT             P1.0
+                       5     ;1602Ö¸Áî¶¨Òå
+  0001                 6     CLR_SCREEN      EQU     01H                     ;ÇåÆÁÖ¸Áî01H
+  0002                 7     CURSOR_ENTER    EQU     02H                     ;»Ø³µ
+  0038                 8     DISPLAY_SET     EQU     38H                     ;ÏÔÊ¾Éè¶¨£¬ÏÔÊ¾2ÐÐ£¬5*7µãÕó
+  000F                 9     SHOW_CURSOR     EQU     0FH                     ;´ò¿ªÏÔÊ¾ºÍ¹â±ê£¬¹â±êÉÁË¸
+  000E                10     CURSOR_UNBLINK  EQU     0EH
+  0014                11     CURSOR_RIGHT    EQU     14H                     ;¹â±êÏòÓÒÒÆ¶¯Ò»Î»
+  0010                12     CURSOR_LEFT     EQU     10H                      ;¹â±êÏò×óÒÆ¶¯Ò»Î»
+  0006                13     RIGHT_CURSOR    EQU     06H                      ;ÏÔÊ¾·½ÏòÏòÓÒ
+  0004                14     LEFT_CURSOR     EQU     04H                      ;ÏÔÊ¾·½ÏòÏò×ó
+  0080                15     CURSOR_FL       EQU     80H                     ;¹â±ê»Øµ½µÚÒ»ÐÐ¿ªÍ·
+  00C0                16     CURSOR_SL       EQU     0C0H                    ;¹â±ê»Øµ½µÚ¶þÐÐ¿ªÍ·
+                      17     ;±äÁ¿£¬»º´æÇøÉèÖÃ
+  0020                18     TIME_T0         EQU     20H             ;´æ·ÅT0´ÎÊý
+  0021                19     KEY_BUF         EQU     21H             ;¼ÇÂ¼¼üÖµ
+  0022                20     TIME_KEY        EQU     22H             ;¼ÇÂ¼1ÃëÄÚ°´¼ü´ÎÊý
+  0023                21     ORDER           EQU     23H             ;Ö¸Ïòµ±Ç°×Ö·û»º´æµØÖ·=#WORD_BUF+Æ«ÒÆÁ¿
+  0024                22     INPUT_METHOD    EQU     24H             ;´æ·ÅÊäÈë·¨¼ü×´Ì¬       
+  0050                23     WORD_BUF        EQU     50H             ;´æ·ÅASCIIÓï¾ä
+                      24     ;---------------------------------------------------------------------------
+0000                  25             ORG     0000H
+0000 2100             26             AJMP    MAIN
+0003                  27             ORG     0003H
+0003 2183             28             AJMP    INT_0
+000B                  29             ORG     000BH
+000B 4154             30             AJMP    INT_T0
+0023                  31             ORG     0023H
+0023 214F             32             AJMP    INT_S
+0100                  33             ORG     00100H
+0100 758160           34     MAIN:   MOV     SP,#60H
+                      35     ;´®¿Ú£¬¶¨Ê±Æ÷³õÊ¼»¯        
+0103 759850           36             MOV     SCON,#50H       ;´®¿Ú·½Ê½1£¬REN=1
+0106 758921           37             MOV     TMOD,#21H     ;¶¨Ê±Æ÷1£¬·½Ê½2;¶¨Ê±Æ÷0£¬·½Ê½1£¬×ö1s¶¨Ê±
+0109 758C3C           38             MOV     TH0,#3CH
+010C 758AAF           39             MOV     TL0,#0AFH       ;19*
+010F 752019           40             MOV     TIME_T0,#19H      ;
+0112 758DFD           41             MOV     TH1,#0FDH       ;¾§Õñ11.0592M,²¨ÌØÂÊ19200
+0115 D2A9             42             SETB    ET0
+0117 D288             43             SETB    IT0                ;IT0=1,±ßÑØ´¥·¢
+0119 D28E             44             SETB    TR1
+011B 438780           45             ORL     PCON,#80H          ;²¨ÌØÂÊ¼Ó±¶  
+011E D2AC             46             SETB    ES
+0120 D2A8             47             SETB    EX0
+                      48     ;1602³õÊ¼»¯
+0122 758001           49             MOV             P0,#01H                 ;ÇåÆÁÖ¸Áî01H
+0125 519A             50             CALL    LOADC
+0127 758038           51             MOV             P0,#38H                 ;ÏÔÊ¾Éè¶¨£¬ÏÔÊ¾2ÐÐ£¬5*7µãÕó
+012A 519A             52             CALL    LOADC
+012C 75800F           53             MOV             P0,#0FH                 ;´ò¿ªÏÔÊ¾ºÍ¹â±ê£¬¹â±êÉÁË¸
+012F 519A             54             CALL    LOADC
+0131 758006           55             MOV             P0,#06H                 ;¹â±êÏòÓÒÒÆ¶¯
+0134 519A             56             CALL    LOADC
+0136 758080           57             MOV             P0,#80H                 ;¹â±ê»Øµ½µÚÒ»ÐÐ¿ªÍ·
+0139 519A             58             CALL    LOADC   
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     2
+
+                      59     ;±äÁ¿³õÊ¼»¯             
+013B 7521FF           60             MOV     KEY_BUF,#0FFH
+013E 752200           61             MOV     TIME_KEY,#00H
+0141 752350           62             MOV     ORDER,#WORD_BUF
+0144 752400           63             MOV     INPUT_METHOD,#00H                  
+0147 D2AF             64             SETB    EA
+                      65     ;Ñ­»·           
+0149 5190             66     LOOP:   ACALL   DELAY
+014B 318F             67             ACALL   KEY_IN             
+014D 80FA             68             SJMP    LOOP
+                      69     
+                      70     ;-----------INT_S;´®¿ÚÖÐ¶Ï---------
+014F 309804           71     INT_S:          JNB     RI,SEND
+0152 3178             72                     ACALL   S_R_OK
+0154 8002             73                     SJMP    EXIT
+0156 3172             74     SEND:           ACALL   S_T_OK
+0158 32               75     EXIT:           RETI
+                      76     ;-------------S_T-------
+0159 859099           77     S_T:            MOV     SBUF,P1
+015C 3099FD           78                     JNB     TI,$    
+015F 22               79                     RET     
+                      80     ;------------SEND_BUF;·¢ËÍWORD_BUF»º´æÇøÄÚÈÝ------
+0160                  81     SEND_BUF:       
+0160 7950             82                     MOV     R1,#WORD_BUF
+0162 8799             83     LOOP_SEND:      MOV     SBUF,@R1
+0164 3099FD           84                     JNB     TI,$
+0167 C299             85                     CLR     TI
+0169 5190             86                     CALL    DELAY
+016B 5190             87                     CALL    DELAY
+016D 09               88                     INC     R1
+016E E7               89                     MOV     A,@R1             
+016F 70F1             90                     JNZ     LOOP_SEND         ;¿Õ×Ö·ûÍ£Ö¹·¢ËÍ
+0171 22               91                     RET             
+                      92     ;----------S_T_OK-----------
+0172 C299             93     S_T_OK:         CLR     TI
+0174 22               94                     RET
+                      95     ;------------S_R--------
+0175 C298             96     S_R:            CLR     RI
+0177 22               97                     RET
+                      98     ;----------S_R_OK---------
+0178 C298             99     S_R_OK:         CLR     RI
+017A 859950          100                     MOV     WORD_BUF,SBUF   ;Ö»ÏÔÊ¾½ÓÊÕÄÚÈÝ²»´æÈëÄÚ´æ       
+017D 855080          101                     MOV     P0,WORD_BUF
+0180 51A5            102                     CALL    DISPLAY
+0182 22              103                     RET
+                     104     ;------------INT_0;·¢ËÍ°´¼üISP----------
+0183 C2A8            105     INT_0:          CLR     EX0
+0185 C289            106                     CLR     IE0     
+0187 3160            107                     ACALL   SEND_BUF                
+0189 752350          108                     MOV     ORDER,#WORD_BUF      ;·¢ËÍÍêÖ¸ÕëÖ¸Ïò»ùÖ·£¬²¢²»Çå³ý»º´æ
+018C D2A8            109                     SETB    EX0
+018E 32              110                     RETI
+                     111     ;--------GET_KEY;¼üÅÌ´¦Àí³ÌÐò-------------
+                     112     ;É¨ÃèÊÇ·ñÓÐ¼ü
+018F 75A0F0          113     KEY_IN:    MOV          P2,#0F0H    ;¸ßËÄÎ»×÷ÎªÊäÈë  ÖÃÐÐÏßÎª¸ßµçÆ½ , ÁÐÏßÎªµÍµçÆ½
+0192 E5A0            114                MOV          A,P2
+0194 54F0            115                ANL          A,#0F0H         ;ÆÁ±ÎµÍËÄÎ»
+0196 F5F0            116                MOV          B,A
+0198 75A00F          117                MOV          P2,#0FH     ;µÍËÄÎ»×÷ÎªÊäÈë  ;ÖÃÁÐÏßÎª¸ßµçÆ½£¬ÐÐÏßÎªµÍµçÆ½
+019B E5A0            118                MOV          A,P2
+019D 540F            119                ANL          A,#0FH
+019F 45F0            120                ORL          A,B               ;¸ßËÄÎ»ÓëµÍËÄÎ»ÖØÐÂ×éºÏ
+01A1 F8              121                MOV          R0,A
+01A2 B4FF01          122                CJNE         A,#0FFH,KEY_S  ;²»µÈ±íÊ¾ÓÐ¼ü£¬ÑÓÊ±¼ÌÐø²éÏû³ý¶¶¶¯;0FFHÎªÎ´°´¼ü
+01A5 22              123                RET 
+                     124     ;ÓÐ¼üÏû¶¶¶¯
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     3
+
+01A6 5190            125     KEY_S:     ACALL        DELAY
+01A8 75A0F0          126                MOV          P2,#0F0H    ;¸ßËÄÎ»×÷ÎªÊäÈë  ÖÃÐÐÏßÎª¸ßµçÆ½ , ÁÐÏßÎªµÍµçÆ½
+01AB E5A0            127                MOV          A,P2
+01AD 54F0            128                ANL          A,#0F0H         ;ÆÁ±ÎµÍËÄÎ»
+01AF F5F0            129                MOV          B,A
+01B1 75A00F          130                MOV          P2,#0FH     ;µÍËÄÎ»×÷ÎªÊäÈë  ;ÖÃÁÐÏßÎª¸ßµçÆ½£¬ÐÐÏßÎªµÍµçÆ½
+01B4 E5A0            131                MOV          A,P2
+01B6 540F            132                ANL          A,#0FH
+01B8 45F0            133                ORL          A,B               ;¸ßËÄÎ»ÓëµÍËÄÎ»ÖØÐÂ×éºÏ       
+01BA B50002          134                CJNE  A,00H,RET_KEY  ;00H±íÊ¾R0,Î´°´¼üÌøÖÁ·µ»Ø
+01BD 31C0            135                ACALL        KEY_IN1
+01BF 22              136     RET_KEY:        RET
+                     137     ;È·ÊµÓÐ¼ü£¬²é±íÈ¡ÐòºÅ      
+01C0                 138     KEY_IN1:   
+01C0 F5F0            139                MOV  B,A           ;É¨Ãèµ½µÄ¼üÂë´æBÄÚ
+01C2 9002B9          140                MOV  DPTR,#KEYTABLE               ;²é¼üÂëÐòºÅ
+01C5 7BFF            141                MOV  R3,#0FFH
+01C7 0B              142     KEY_IN2:   INC  R3
+01C8 EB              143                MOV  A,R3
+01C9 93              144                MOVC  A,@A+DPTR
+01CA B5F002          145                CJNE  A,B,KEY_IN3
+01CD 8004            146                SJMP  GET_KEY_ORDER         ;²éµ½ÐòºÅR3,Ìø×ª
+01CF B400F5          147     KEY_IN3:   CJNE  A,#00H,KEY_IN2         ;00HÎª½áÊøÂë
+01D2 22              148                RET  
+                     149     ;²éµ½Ë³ÐòÂë
+01D3                 150     GET_KEY_ORDER:    
+01D3 BB0908          151                CJNE R3,#09,KEY_CLR_SCR         
+                     152      ;ÊÇ×óÒÆ¼ü
+01D6 758010          153                MOV  P0,#CURSOR_LEFT
+01D9 519A            154                CALL LOADC
+01DB 1523            155                DEC  ORDER     
+01DD 22              156                RET                  
+                     157     ;ÅÐ¶ÏÇåÆÁ¼ü
+01DE BB0A19          158      KEY_CLR_SCR:   CJNE    R3,#10,KEY_INPUT_METHOD
+01E1 758001          159                     MOV     P0,#CLR_SCREEN        ;µ÷ÓÃÇåÆÁÃüÁî
+01E4 519A            160                     CALL    LOADC
+                     161                     ;Ñ­»·Çå³ý»º´æÇø
+01E6 A823            162                     MOV     R0,ORDER            ;ORDERÖ¸ÏòÁËµ±Ç°»º´æµØÖ·
+01E8 7600            163                     MOV     @R0,#00H
+01EA B45002          164     C_LOOP_KEY_CLR: CJNE    A,#50H,LOOP_KEY_CLR
+01ED 800A            165                     JMP     RET_KEY_SCR
+01EF 1523            166     LOOP_KEY_CLR:   DEC     ORDER
+01F1 A823            167                     MOV     R0,ORDER
+01F3 7600            168                     MOV     @R0,#00H
+01F5 E523            169                     MOV     A,ORDER
+01F7 80F1            170                     JMP    C_LOOP_KEY_CLR                           
+01F9 22              171     RET_KEY_SCR:            RET
+                     172     ;ÊäÈë·¨Ñ¡Ôñ¼ü
+01FA BB0B03          173     KEY_INPUT_METHOD:       CJNE    R3,#11,OTHER_KEY
+01FD 0524            174                             INC     INPUT_METHOD
+01FF 22              175                             RET
+                     176     
+                     177     ;ÆäËû·Ç¹¦ÄÜ¼ü
+0200 EB              178     OTHER_KEY:      MOV  A,R3               ;È¡Ë³ÐòÂë          
+                     179                 
+0201 308C3B          180                     JNB     TR0,NEW_KEY             ;ÊÇ·ñÓÐ¼ÆÊ±                                
+                                                          
+                     181                     ;»¹ÔÚ1SÄÚ
+0204 B52113          182                     CJNE            A,KEY_BUF,DIR_NEW_KEY      ;ÓëÖ®Ç°Öµ±È½Ï¡£·ñ£¬ÌøÖÁÈ·ÈÏ¾É¼üÍ
+                             ê³É£¬±£´æÐÂ¼ü
+                     183             ;»¹ÊÇÔ­¼ü Î´³¬¹ý1S£¬°´¼ü´ÎÊý¼Ó1
+                     184                     ;ÖØÐÂ¼Æ1S
+0207 752013          185                     MOV     TIME_T0,#19
+020A 0522            186                     INC     TIME_KEY
+                     187                     ;ÏÔÊ¾   
+020C 516C            188                     CALL    WORD_TRAN
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     4
+
+020E A823            189                     MOV     R0,ORDER          ;ORDERÎªµ±Ç°»º´æÇøÖ¸Õë
+0210 8680            190                     MOV     P0,@R0
+0212 51A5            191                     CALL    DISPLAY
+0214 758010          192                     MOV     P0,#CURSOR_LEFT
+0217 519A            193                     CALL    LOADC                   
+0219 22              194                     RET
+                     195     ;1SÎ´¹ý¾ÍÓÐÐÂ¼ü
+021A                 196     DIR_NEW_KEY:    
+                     197                     ;ÖØÐÂ¼ÆÊ±               
+021A 752013          198                     MOV     TIME_T0,#19
+021D D28C            199                     SETB    TR0
+                     200                     ;Ö±½Ó±£´æ¾ÉÖµ
+                     201     
+021F 516C            202                     CALL    WORD_TRAN
+0221 0523            203                     INC     ORDER           ;»º´æÇøÖ¸Õë¼Ó1
+0223 A823            204                     MOV     R0,ORDER
+0225 8680            205                     MOV     P0,@R0
+0227 758014          206                     MOV     P0,#CURSOR_RIGHT       ;¹â±êÇ¿ÖÆÓÒÒÆ
+022A 519A            207                     CALL    LOADC
+                     208                     
+                     209     
+                     210                     ;¼ÇÂ¼ÐÂÖµ
+022C 8B21            211                     MOV     KEY_BUF,R3 
+022E 752200          212                     MOV     TIME_KEY,#0
+                     213                     ;ÏÔÊ¾ÐÂÖµ       
+0231 516C            214                     CALL    WORD_TRAN
+0233 A823            215                     MOV     R0,ORDER
+0235 8680            216                     MOV     P0,@R0
+0237 51A5            217                     CALL    DISPLAY
+0239 758010          218                     MOV     P0,#CURSOR_LEFT
+023C 519A            219                     CALL    LOADC 
+                     220     
+                     221     
+023E 22              222                     RET
+                     223     ;1s¹ýºóµÄÐÂ¼ü                      
+023F D28C            224     NEW_KEY:        SETB    TR0      ;¿ªÊ¼1S¼ÆÊ± 
+                     225                     ;±£´æÐÂ¼ü               
+0241 8B21            226                     MOV     KEY_BUF,R3
+0243 752200          227                     MOV     TIME_KEY,#00H
+                     228     
+                     229                     ;ÏÔÊ¾ÐÂ¼ü
+0246 516C            230                     CALL    WORD_TRAN
+0248 A823            231                     MOV     R0,ORDER
+024A 8680            232                     MOV     P0,@R0
+024C 51A5            233                     CALL    DISPLAY 
+024E 758010          234                     MOV     P0,#CURSOR_LEFT
+0251 519A            235                     CALL    LOADC                             
+0253 22              236                     RET                     
+                     237     ;--------- INT_T0---------
+0254                 238     INT_T0:                                                 
+                     239                     ;ÖØÐÂ×°ÔØ
+0254 758C3C          240                     MOV     TH0,#3CH
+0257 758AAF          241                     MOV     TL0,#0AFH       ;19*
+                     242                     
+025A D5200E          243                     DJNZ    TIME_T0,RET_T0     ;ÊÇ·ñµ½1S
+                     244                     ;1Sµ½
+025D 752013          245                     MOV     TIME_T0,#19      ;1Ãëµ½£¬¹Ø±Õ¶¨Ê±Æ÷0 
+0260 C28C            246                     CLR     TR0             
+0262 516C            247                     CALL    WORD_TRAN
+0264 0523            248                     INC     ORDER
+0266 758014          249                     MOV     P0,#CURSOR_RIGHT
+0269 519A            250                     CALL    LOADC   
+                     251                     
+026B 32              252     RET_T0:         RETI
+                     253     ;----------WORD_TARN;¸ù¾Ý¼üÖµÓë´ÎÊý×ª»»³ÉASCII´æÈë»º´æ------------
+026C                 254     WORD_TRAN:      ;²éÑ¯µ±Ç°ÊäÈë·¨¼üÖµ£¬¸ù¾Ý²»Í¬ÊäÈë·¨²é²»Í¬±í
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     5
+
+026C E524            255                     MOV     A,INPUT_METHOD
+026E 75F003          256                     MOV     B,#03H
+0271 84              257                     DIV     AB
+0272 E5F0            258                     MOV     A,B
+0274 B40005          259                     CJNE    A,#00H,NEXT_INPUT1
+0277 9002C6          260                     MOV     DPTR,#WORD_KEY_TABLE0
+027A 800B            261                     JMP     INPUT_LOAD
+027C B40105          262     NEXT_INPUT1:    CJNE    A,#01H,NEXT_INPUT2
+027F 9002CF          263                     MOV     DPTR,#WORD_KEY_TABLE1
+0282 8003            264                     JMP     INPUT_LOAD
+0284 9002D8          265     NEXT_INPUT2:    MOV      DPTR,#WORD_KEY_TABLE2
+0287 E521            266     INPUT_LOAD:     MOV     A,KEY_BUF
+                     267                     ;²é±í
+0289 93              268                     MOVC    A,@A+DPTR       ;ASCIIÖµ·ÅA
+028A 2522            269                     ADD     A,TIME_KEY      ;¼ÓÉÏ´ÎÊý
+                     270                     ;½«ASCII·ÅÈëORDERËùÖ¸µÄ»º´æ
+028C A823            271                     MOV     R0,ORDER
+028E F6              272                     MOV     @R0,A                   
+028F 22              273                     RET     
+                     274     ;-------DELAY-----                
+0290 7E50            275     DELAY:  MOV     R6,#050H
+0292 7FFF            276     AA1:    MOV     R7,#0FFH
+0294 00              277     AA:             NOP
+0295 DFFD            278                     DJNZ    R7,AA
+0297 DEF9            279                     DJNZ    R6,AA1
+0299 22              280                     RET
+                     281     ;---------1602×Ó³ÌÐò---------------------
+                     282     ;---------          ------------------
+029A                 283     LOADC:   
+029A C292            284             CLR             RS                              ;RS=0£¬Ð´ÃüÁî
+029C C291            285             CLR             RW                              ;RW=0£¬Ð´Èë
+029E C290            286             CLR             E                               ;Ò»¸öÏÂ½µÑØ£¬DB0~DB7¿ÚÊý¾Ý±»¶ÁÈë
+                     287     
+02A0 51B0            288             CALL    DELAY_1602
+02A2 D290            289             SETB    E                               ;ÆÁ±ÎDB¿ÚÊý¾Ý
+02A4 22              290             RET
+                     291     
+02A5                 292     DISPLAY: 
+02A5 D292            293             SETB            RS              ;RS=1£¬Êý¾Ý
+02A7 C291            294             CLR             RW              ;Ð´Èë
+02A9 C290            295             CLR             E               ;Êý¾Ý±»¶ÁÈë
+                     296     
+02AB 51B0            297             CALL    DELAY_1602
+02AD D290            298             SETB    E                       ;ÆÁ±ÎDB¿ÚÊý¾Ý
+02AF 22              299             RET
+                     300     
+02B0                 301     DELAY_1602:
+02B0 7EC8            302             MOV             R6,#200
+02B2                 303     D1:
+02B2 7FF8            304             MOV             R7,#248
+02B4                 305     D2:
+02B4 DFFE            306             DJNZ    R7,D2
+02B6 DEFA            307             DJNZ    R6,D1
+                     308     
+02B8 22              309             RET
+                     310                     
+                     311     ;-----------------------------------------------------
+                     312     
+02B9 EEDEBE          313     KEYTABLE:       DB      0EEH,0DEH,0BEH
+02BC EDDDBD          314                     DB      0EDH,0DDH,0BDH
+02BF EBDBBB          315                     DB      0EBH,0DBH,0BBH
+02C2 E7D7B7          316                     DB      0E7H,0D7H,0B7H
+02C5 00              317                     DB      00H
+02C6 20414447        318     WORD_KEY_TABLE0:        DB      ' ','A','D','G','J','M','P','T','W'
+02CA 4A4D5054                
+02CE 57                      
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     6
+
+02CF 20616467        319     WORD_KEY_TABLE1:        DB      ' ','a','d','g','j','m','p','t','w'
+02D3 6A6D7074                
+02D7 77                      
+02D8 30323334        320     WORD_KEY_TABLE2:        DB      '0','2','3','4','5','6','7','8','9'     
+02DC 35363738                
+02E0 39                      
+                     321             END
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     7
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AA . . . . . . . .  C ADDR   0294H   A   
+AA1. . . . . . . .  C ADDR   0292H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CLR_SCREEN . . . .  N NUMB   0001H   A   
+CURSOR_ENTER . . .  N NUMB   0002H   A   
+CURSOR_FL. . . . .  N NUMB   0080H   A   
+CURSOR_LEFT. . . .  N NUMB   0010H   A   
+CURSOR_RIGHT . . .  N NUMB   0014H   A   
+CURSOR_SL. . . . .  N NUMB   00C0H   A   
+CURSOR_UNBLINK . .  N NUMB   000EH   A   
+C_LOOP_KEY_CLR . .  C ADDR   01EAH   A   
+D1 . . . . . . . .  C ADDR   02B2H   A   
+D2 . . . . . . . .  C ADDR   02B4H   A   
+DELAY. . . . . . .  C ADDR   0290H   A   
+DELAY_1602 . . . .  C ADDR   02B0H   A   
+DIR_NEW_KEY. . . .  C ADDR   021AH   A   
+DISPLAY. . . . . .  C ADDR   02A5H   A   
+DISPLAY_SET. . . .  N NUMB   0038H   A   
+E. . . . . . . . .  B ADDR   0090H.0 A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ES . . . . . . . .  B ADDR   00A8H.4 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EX0. . . . . . . .  B ADDR   00A8H.0 A   
+EXIT . . . . . . .  C ADDR   0158H   A   
+GET_KEY_ORDER. . .  C ADDR   01D3H   A   
+IE0. . . . . . . .  B ADDR   0088H.1 A   
+INPUT_LOAD . . . .  C ADDR   0287H   A   
+INPUT_METHOD . . .  N NUMB   0024H   A   
+INT_0. . . . . . .  C ADDR   0183H   A   
+INT_S. . . . . . .  C ADDR   014FH   A   
+INT_T0 . . . . . .  C ADDR   0254H   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+KEYTABLE . . . . .  C ADDR   02B9H   A   
+KEY_BUF. . . . . .  N NUMB   0021H   A   
+KEY_CLR_SCR. . . .  C ADDR   01DEH   A   
+KEY_IN . . . . . .  C ADDR   018FH   A   
+KEY_IN1. . . . . .  C ADDR   01C0H   A   
+KEY_IN2. . . . . .  C ADDR   01C7H   A   
+KEY_IN3. . . . . .  C ADDR   01CFH   A   
+KEY_INPUT_METHOD .  C ADDR   01FAH   A   
+KEY_S. . . . . . .  C ADDR   01A6H   A   
+LEFT_CURSOR. . . .  N NUMB   0004H   A   
+LOADC. . . . . . .  C ADDR   029AH   A   
+LOOP . . . . . . .  C ADDR   0149H   A   
+LOOP_KEY_CLR . . .  C ADDR   01EFH   A   
+LOOP_SEND. . . . .  C ADDR   0162H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+NEW_KEY. . . . . .  C ADDR   023FH   A   
+NEXT_INPUT1. . . .  C ADDR   027CH   A   
+NEXT_INPUT2. . . .  C ADDR   0284H   A   
+ORDER. . . . . . .  N NUMB   0023H   A   
+OTHER_KEY. . . . .  C ADDR   0200H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+PCON . . . . . . .  D ADDR   0087H   A   
+RET_KEY. . . . . .  C ADDR   01BFH   A   
+RET_KEY_SCR. . . .  C ADDR   01F9H   A   
+RET_T0 . . . . . .  C ADDR   026BH   A   
+RI . . . . . . . .  B ADDR   0098H.0 A   
+A51 MACRO ASSEMBLER  RS232                                                                12/06/2011 20:00:31 PAGE     8
+
+RIGHT_CURSOR . . .  N NUMB   0006H   A   
+RS . . . . . . . .  B ADDR   0090H.2 A   
+RW . . . . . . . .  B ADDR   0090H.1 A   
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SEND . . . . . . .  C ADDR   0156H   A   
+SEND_BUF . . . . .  C ADDR   0160H   A   
+SHOW_CURSOR. . . .  N NUMB   000FH   A   
+SP . . . . . . . .  D ADDR   0081H   A   
+S_R. . . . . . . .  C ADDR   0175H   A   
+S_R_OK . . . . . .  C ADDR   0178H   A   
+S_T. . . . . . . .  C ADDR   0159H   A   
+S_T_OK . . . . . .  C ADDR   0172H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TIME_KEY . . . . .  N NUMB   0022H   A   
+TIME_T0. . . . . .  N NUMB   0020H   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+WORD_BUF . . . . .  N NUMB   0050H   A   
+WORD_KEY_TABLE0. .  C ADDR   02C6H   A   
+WORD_KEY_TABLE1. .  C ADDR   02CFH   A   
+WORD_KEY_TABLE2. .  C ADDR   02D8H   A   
+WORD_TRAN. . . . .  C ADDR   026CH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

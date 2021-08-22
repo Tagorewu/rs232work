@@ -1,0 +1,26 @@
+<html>
+<body>
+<pre>
+<h1>µVision3 Build Log</h1>
+<h2>Project:</h2>
+G:\Documents and Settings\wuqt\×ÀÃæ\rs232work\rs232.uv2
+Project File Date:  12/03/2011
+
+<h2>Output:</h2>
+assembling rs232.asm...
+rs232.asm - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+linking...
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    0000H
+    TO:      0002H
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  ?C_START
+    MODULE:  STARTUP.obj (?C_STARTUP)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  ?C_START
+    MODULE:  STARTUP.obj (?C_STARTUP)
+    ADDRESS: 0307H
+Program Size: data=9.0 xdata=0 code=780
+creating hex file from "rs232"...
+"rs232" - 0 Error(s), 3 Warning(s).
